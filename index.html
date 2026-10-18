@@ -10,13 +10,13 @@
   :root {
     --bg: #f6f5f1; --card: #ffffff; --ink: #1f2933; --muted: #62707d;
     --line: #e2dfd6; --accent: #2f5d8a; --accent-soft: #e6eef6;
-    --admin: #8a5a2f; --kurs: #2f5d8a; --plan: #3d7a5a; --sva: #7a4a8a; --verk: #5b6470;
+    --top: #b4472f; --admin: #8a5a2f; --kurs: #2f5d8a; --plan: #3d7a5a; --sva: #7a4a8a; --verk: #5b6470;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #16191d; --card: #1f2429; --ink: #e8ebee; --muted: #9aa5b0;
       --line: #2f363d; --accent: #7fb0e0; --accent-soft: #232d38;
-      --admin: #d9a66f; --kurs: #7fb0e0; --plan: #7fcaa0; --sva: #c79ad6; --verk: #a6afb9;
+      --top: #ef8f78; --admin: #d9a66f; --kurs: #7fb0e0; --plan: #7fcaa0; --sva: #c79ad6; --verk: #a6afb9;
     }
   }
   * { box-sizing: border-box; }
@@ -69,9 +69,19 @@
     <input type="search" id="q" placeholder="Sök länk…" aria-label="Sök länk" autofocus>
   </header>
 
+  <section data-cat style="--c: var(--top)">
+    <h2>Snabbåtkomst</h2>
+    <div class="grid">
+      <a class="link" href="https://docs.google.com/document/d/1GtwRae9gVxsKPCVM1e1KgYjleyT6JA9c0EXw5L28BeU/edit" id="noteringar"><strong>Noteringar</strong><span>Sådant jag behöver komma ihåg</span></a>
+      <a class="link" href="https://docs.google.com/spreadsheets/d/1Sue1IGljSaPVK-beB0pIdFDCAC-46-4moQoPlplZHPk/edit?gid=1690479131#gid=1690479131"><strong>Veckoplanering</strong><span>Tom mall att fylla i</span></a>
+    </div>
+  </section>
+
   <section data-cat style="--c: var(--admin)">
     <h2>Administrativt</h2>
     <div class="grid">
+      <a class="link" href="https://docs.google.com/spreadsheets/d/1dJ2AEilm6V9j1N_4xr_hBt151zuHBxHn4LxKBuSnl28/edit?gid=0#gid=0"><strong>Läsårsplan</strong><span>Vecka för vecka, alla klasser</span></a>
+      <a class="link" href="https://docs.google.com/spreadsheets/d/1_C70uF7hkZ70dDF3OBNBPBOn8kBehSr3bZGRrquMLIw/edit?gid=0#gid=0"><strong>Ämnesfördjupning</strong><span>Kalkylark</span></a>
       <a class="link" href="https://auth.vklass.se/?returnUrl=http://app.vklass.se/#/Home/Welcome"><strong>Vklass</strong><span>Inloggning</span></a>
       <a class="link" href="https://www.skola24.se/Applications/Authentication/login.aspx?logout=https://www.skola24.se"><strong>Skola24</strong><span>Inloggning, schema</span></a>
       <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbwFE0MWbIT8rrCrkgB7JShT5lGv2zLpiNrEtpbcVYFiOfcexB1d08Va8FWnrh8VjUNYeA/exec"><strong>Närvaro (QR)</strong><span>Närvaroregistrering</span></a>
@@ -96,6 +106,8 @@
       <a class="link" href="https://erengisle.github.io/Hi_planering/sva1/nab26/"><strong>SVA 1</strong><span>NAB26</span></a>
       <a class="link" href="https://erengisle.github.io/Hi_planering/sva2/ekna25-1/"><strong>SVA 2</strong><span>EKNA25-1</span></a>
       <a class="link" href="https://erengisle.github.io/Hi_planering/sve3/eka24/"><strong>SVE 3</strong><span>EKA24</span></a>
+    </div>
+    <div class="grid" style="margin-top:10px">
       <a class="link" href="https://erengisle.github.io/Hi_planering/hi1b/ek26/"><strong>Historia 1b</strong><span>EK26</span></a>
       <a class="link" href="https://erengisle.github.io/Hi_planering/hi1b/naa24/"><strong>Historia 1b</strong><span>NAA24</span></a>
       <a class="link" href="https://erengisle.github.io/Hi_planering/hi1b/nab24/"><strong>Historia 1b</strong><span>NAB24</span></a>
