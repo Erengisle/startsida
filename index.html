@@ -57,6 +57,29 @@
   .note { color: var(--muted); font-size: .88rem; margin: -2px 0 10px; }
   .hidden { display: none !important; }
   #empty { color: var(--muted); margin-top: 24px; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .tools button {
+    font: inherit; font-size: .9rem; padding: 8px 12px; cursor: pointer;
+    background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
+  }
+  .tools button:hover { border-color: var(--accent); }
+  .multi {
+    display: block; padding: 12px 14px; background: var(--card); color: var(--ink);
+    border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 8px;
+  }
+  .multi strong { display: block; font-weight: 600; }
+  .multi > span { display: block; color: var(--muted); font-size: .85rem; margin-top: 1px; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .pills a {
+    font-size: .85rem; padding: 5px 10px; background: var(--accent-soft); color: var(--accent);
+    border: 1px solid var(--line); border-radius: 6px; text-decoration: none;
+  }
+  .pills a:hover { border-color: var(--accent); }
+  body.edit section { outline: 2px dashed var(--line); outline-offset: 6px; border-radius: 6px; }
+  body.edit section h2 { cursor: grab; }
+  body.edit .link, body.edit .tool { cursor: grab; }
+  body.edit .grid { min-height: 60px; }
+  .drag-ghost { opacity: .35; }
 </style>
 </head>
 <body>
@@ -66,8 +89,14 @@
       <h1>Min startsida</h1>
       <div class="sub">Administration, kurser, planeringar och övningar</div>
     </div>
-    <input type="search" id="q" placeholder="Sök länk…" aria-label="Sök länk" autofocus>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Sök länk…" aria-label="Sök länk" autofocus>
+      <button id="edit" type="button">Ordna om</button>
+      <button id="reset" type="button" class="hidden">Återställ ordning</button>
+    </div>
   </header>
+
+  <main id="sections">
 
   <section data-cat style="--c: var(--top)">
     <h2>Snabbåtkomst</h2>
@@ -97,6 +126,13 @@
       <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbzwQL55sptZ3I2Syxw9SAtm1ER1zkozy8anCT4laSZ6B-XyJKCkoWG26glhkJ3TmBdr/exec?view=dashboard"><strong>SVA 2</strong><span>Dashboard</span></a>
       <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbzoUtujuD30hKl-yutkorg6MuxvkcymG1aAhpFUJ3N3-cFBH54QIfXAOvxzgdqVSvbe/exec?view=dashboard"><strong>SVE 3</strong><span>Dashboard</span></a>
       <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbxFmlopSPDlbniQJLQbH9kFGh7v6TMQXj2tCd-08DscYzF8UT4bnznSzm0vZm1os-a39g/exec?view=dashboard"><strong>Historia 1b</strong><span>Dashboard, samtliga klasser</span></a>
+      <div class="multi link" data-key="provningar">
+        <strong>Prövningar</strong><span>Särskild prövning, Historia 1b</span>
+        <div class="pills">
+          <a href="https://erengisle.github.io/studieTidsPlan_provning/">Elevsida</a>
+          <a href="https://drive.google.com/drive/folders/16nLije9CSnyJd8kSochevEuibsl1Gn4B">Drive-mapp</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -135,9 +171,12 @@
     </div>
   </section>
 
+  </main>
+
   <p id="empty" class="hidden">Inga länkar matchar sökningen.</p>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script>
   const q = document.getElementById('q');
   const empty = document.getElementById('empty');
@@ -151,11 +190,86 @@
         el.classList.toggle('hidden', !hit);
         if (hit) shown++;
       });
-      sec.classList.toggle('hidden', shown === 0);
+      sec.classList.toggle('hidden', !!t && shown === 0);
       if (shown) any = true;
     });
-    empty.classList.toggle('hidden', any);
+    empty.classList.toggle('hidden', !t || any);
   });
+
+  /* ---- Ordna om: dra och släpp, sparas i webbläsaren ---- */
+  const LAYOUT_KEY = 'startsida-layout-v1';
+  const main = document.getElementById('sections');
+  const editBtn = document.getElementById('edit');
+  const resetBtn = document.getElementById('reset');
+
+  function cardKey(el) {
+    if (el.dataset.key) return el.dataset.key;
+    const href = el.getAttribute('href');
+    if (href) return href;
+    const b = el.querySelector('[data-copy]');
+    return b ? b.dataset.copy : el.textContent.trim();
+  }
+  main.querySelectorAll('section[data-cat]').forEach(sec => {
+    const name = sec.querySelector('h2').textContent.trim();
+    sec.dataset.key = name;
+    sec.querySelectorAll('.grid').forEach((g, i) => { g.dataset.gid = name + '#' + i; });
+  });
+
+  function snapshot() {
+    const grids = {};
+    main.querySelectorAll('.grid').forEach(g => { grids[g.dataset.gid] = [...g.children].map(cardKey); });
+    return { sections: [...main.children].map(s => s.dataset.key), grids };
+  }
+  function save() {
+    try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(snapshot())); } catch (e) {}
+  }
+  function applyLayout(layout) {
+    const secs = {};
+    [...main.children].forEach(s => { secs[s.dataset.key] = s; });
+    layout.sections.forEach(k => { if (secs[k]) main.appendChild(secs[k]); });
+    [...main.children].filter(s => !layout.sections.includes(s.dataset.key)).forEach(s => main.appendChild(s));
+    const cards = {};
+    main.querySelectorAll('.link, .tool').forEach(c => { cards[cardKey(c)] = c; });
+    const grids = {};
+    main.querySelectorAll('.grid').forEach(g => { grids[g.dataset.gid] = g; });
+    Object.keys(layout.grids).forEach(gid => {
+      if (!grids[gid]) return;
+      layout.grids[gid].forEach(k => { if (cards[k]) grids[gid].appendChild(cards[k]); });
+    });
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(LAYOUT_KEY));
+    if (saved && saved.sections && saved.grids) applyLayout(saved);
+  } catch (e) {}
+
+  const sorters = [];
+  function initSort() {
+    const opts = { animation: 150, disabled: true, onEnd: save, ghostClass: 'drag-ghost', delay: 120, delayOnTouchOnly: true };
+    sorters.push(Sortable.create(main, Object.assign({}, opts, { handle: 'h2', draggable: 'section' })));
+    main.querySelectorAll('.grid').forEach(g => {
+      sorters.push(Sortable.create(g, Object.assign({}, opts, { group: 'cards', draggable: '.link, .tool' })));
+    });
+  }
+  if (typeof Sortable === 'undefined') {
+    editBtn.classList.add('hidden');
+  } else {
+    initSort();
+    editBtn.addEventListener('click', () => {
+      const on = !document.body.classList.contains('edit');
+      document.body.classList.toggle('edit', on);
+      sorters.forEach(s => s.option('disabled', !on));
+      editBtn.textContent = on ? 'Klar' : 'Ordna om';
+      resetBtn.classList.toggle('hidden', !on);
+    });
+    resetBtn.addEventListener('click', () => {
+      try { localStorage.removeItem(LAYOUT_KEY); } catch (e) {}
+      location.reload();
+    });
+    // Medan man ordnar ska länkar inte öppnas
+    document.addEventListener('click', e => {
+      if (document.body.classList.contains('edit') && e.target.closest('.link a, a.link')) e.preventDefault();
+    }, true);
+  }
   document.querySelectorAll('[data-copy]').forEach(b => {
     b.addEventListener('click', async () => {
       const old = b.textContent;
