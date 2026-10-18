@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Min startsida</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --card: #ffffff; --ink: #1f2933; --muted: #62707d;
+    --line: #e2dfd6; --accent: #2f5d8a; --accent-soft: #e6eef6;
+    --admin: #8a5a2f; --kurs: #2f5d8a; --plan: #3d7a5a; --sva: #7a4a8a; --verk: #5b6470;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16191d; --card: #1f2429; --ink: #e8ebee; --muted: #9aa5b0;
+      --line: #2f363d; --accent: #7fb0e0; --accent-soft: #232d38;
+      --admin: #d9a66f; --kurs: #7fb0e0; --plan: #7fcaa0; --sva: #c79ad6; --verk: #a6afb9;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 16px 56px; }
+  header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; margin-bottom: 22px; }
+  h1 { margin: 0; font-size: 1.7rem; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: .95rem; margin-top: 2px; }
+  input[type=search] {
+    width: 260px; max-width: 100%; padding: 9px 12px; font: inherit;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink);
+  }
+  input[type=search]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  section { margin-top: 26px; }
+  section h2 {
+    font-size: .8rem; text-transform: uppercase; letter-spacing: .09em; margin: 0 0 10px;
+    color: var(--c); display: flex; align-items: center; gap: 8px;
+  }
+  section h2::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 10px; }
+  a.link, .tool {
+    display: block; padding: 12px 14px; background: var(--card); color: var(--ink);
+    border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 8px;
+    text-decoration: none; transition: transform .08s, box-shadow .08s;
+  }
+  a.link:hover, a.link:focus-visible { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.12); outline: none; }
+  a.link strong, .tool strong { display: block; font-weight: 600; }
+  a.link span, .tool span { display: block; color: var(--muted); font-size: .85rem; margin-top: 1px; }
+  .tool { display: flex; flex-direction: column; gap: 8px; }
+  .tool button {
+    align-self: flex-start; font: inherit; font-size: .85rem; padding: 5px 10px; cursor: pointer;
+    background: var(--accent-soft); color: var(--accent); border: 1px solid var(--line); border-radius: 6px;
+  }
+  .tool button:hover { border-color: var(--accent); }
+  .note { color: var(--muted); font-size: .88rem; margin: -2px 0 10px; }
+  .hidden { display: none !important; }
+  #empty { color: var(--muted); margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Min startsida</h1>
+      <div class="sub">Administration, kurser, planeringar och övningar</div>
+    </div>
+    <input type="search" id="q" placeholder="Sök länk…" aria-label="Sök länk" autofocus>
+  </header>
+
+  <section data-cat style="--c: var(--admin)">
+    <h2>Administrativt</h2>
+    <div class="grid">
+      <a class="link" href="https://auth.vklass.se/?returnUrl=http://app.vklass.se/#/Home/Welcome"><strong>Vklass</strong><span>Inloggning</span></a>
+      <a class="link" href="https://www.skola24.se/Applications/Authentication/login.aspx?logout=https://www.skola24.se"><strong>Skola24</strong><span>Inloggning, schema</span></a>
+      <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbwFE0MWbIT8rrCrkgB7JShT5lGv2zLpiNrEtpbcVYFiOfcexB1d08Va8FWnrh8VjUNYeA/exec"><strong>Närvaro (QR)</strong><span>Närvaroregistrering</span></a>
+      <a class="link" href="https://journal.prorenata.se/login/"><strong>ProRenata</strong><span>Inloggning</span></a>
+      <a class="link" href="https://www.heroma.se/"><strong>Heroma</strong><span>Inloggning</span></a>
+    </div>
+  </section>
+
+  <section data-cat style="--c: var(--kurs)">
+    <h2>Mina kurser – betygsunderlag</h2>
+    <div class="grid">
+      <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbxqpwAMGJLeyVnzePQOloFivVWZu1_PRzDYrl71e9iN75xl-Ry0NRqx3yVbxH4eP0r4/exec?view=dashboard"><strong>SVA 1</strong><span>Dashboard</span></a>
+      <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbzwQL55sptZ3I2Syxw9SAtm1ER1zkozy8anCT4laSZ6B-XyJKCkoWG26glhkJ3TmBdr/exec?view=dashboard"><strong>SVA 2</strong><span>Dashboard</span></a>
+      <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbzoUtujuD30hKl-yutkorg6MuxvkcymG1aAhpFUJ3N3-cFBH54QIfXAOvxzgdqVSvbe/exec?view=dashboard"><strong>SVE 3</strong><span>Dashboard</span></a>
+      <a class="link" href="https://script.google.com/a/macros/edu.huddinge.se/s/AKfycbxFmlopSPDlbniQJLQbH9kFGh7v6TMQXj2tCd-08DscYzF8UT4bnznSzm0vZm1os-a39g/exec?view=dashboard"><strong>Historia 1b</strong><span>Dashboard, samtliga klasser</span></a>
+    </div>
+  </section>
+
+  <section data-cat style="--c: var(--plan)">
+    <h2>Mina planeringar</h2>
+    <div class="grid">
+      <a class="link" href="https://erengisle.github.io/Hi_planering/sva1/nab26/"><strong>SVA 1</strong><span>NAB26</span></a>
+      <a class="link" href="https://erengisle.github.io/Hi_planering/sva2/ekna25-1/"><strong>SVA 2</strong><span>EKNA25-1</span></a>
+      <a class="link" href="https://erengisle.github.io/Hi_planering/sve3/eka24/"><strong>SVE 3</strong><span>EKA24</span></a>
+      <a class="link" href="https://erengisle.github.io/Hi_planering/hi1b/ek26/"><strong>Historia 1b</strong><span>EK26</span></a>
+      <a class="link" href="https://erengisle.github.io/Hi_planering/hi1b/naa24/"><strong>Historia 1b</strong><span>NAA24</span></a>
+      <a class="link" href="https://erengisle.github.io/Hi_planering/hi1b/nab24/"><strong>Historia 1b</strong><span>NAB24</span></a>
+    </div>
+  </section>
+
+  <section data-cat style="--c: var(--sva)">
+    <h2>Övningar för SVA</h2>
+    <div class="grid">
+      <a class="link" href="https://erengisle.github.io/AVG_SVA/"><strong>Ordföljd på tavlan</strong><span>Huvudsatser, att-bisatser, frågebisatser</span></a>
+      <a class="link" href="https://erengisle.github.io/AVG_SVA/relativa-bisatser/"><strong>Relativa bisatser</strong><span>Genomgång, diagnos och uppgifter</span></a>
+    </div>
+  </section>
+
+  <section data-cat style="--c: var(--verk)">
+    <h2>Bedömningsverktyg (skills i Claude)</h2>
+    <p class="note">Körs inifrån Claude. Kopiera raden och klistra in den i en ny chatt.</p>
+    <div class="grid">
+      <div class="tool"><div><strong>Historia 1b – bedömning</strong><span>Elevsvar mot mål, Gy25 eller Gy11</span></div><button data-copy="Använd skillen historia-bedomning">Kopiera startrad</button></div>
+      <div class="tool"><div><strong>Religion – bedömning</strong><span>Religionskunskap 1 (Gy25)</span></div><button data-copy="Använd skillen religion-bedomning">Kopiera startrad</button></div>
+      <div class="tool"><div><strong>Religion – etikuppgiften</strong><span>Hannahs dilemma</span></div><button data-copy="Använd skillen religion-etik-bedomning">Kopiera startrad</button></div>
+      <div class="tool"><div><strong>Referatkontroll</strong><span>Elevreferat mot källtext</span></div><button data-copy="Använd skillen referatkontroll">Kopiera startrad</button></div>
+      <div class="tool"><div><strong>Referatkontroll SVA 2</strong><span>Inkl. språkriktighet</span></div><button data-copy="Använd skillen referatkontroll-sva2">Kopiera startrad</button></div>
+      <div class="tool"><div><strong>Lektionsdagar</strong><span>Dagar med lektion enligt läsårsplan</span></div><button data-copy="Använd skillen lektionsdagar-lasarsplan">Kopiera startrad</button></div>
+    </div>
+  </section>
+
+  <p id="empty" class="hidden">Inga länkar matchar sökningen.</p>
+</div>
+
+<script>
+  const q = document.getElementById('q');
+  const empty = document.getElementById('empty');
+  q.addEventListener('input', () => {
+    const t = q.value.trim().toLowerCase();
+    let any = false;
+    document.querySelectorAll('section[data-cat]').forEach(sec => {
+      let shown = 0;
+      sec.querySelectorAll('.link, .tool').forEach(el => {
+        const hit = !t || el.textContent.toLowerCase().includes(t);
+        el.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      sec.classList.toggle('hidden', shown === 0);
+      if (shown) any = true;
+    });
+    empty.classList.toggle('hidden', any);
+  });
+  document.querySelectorAll('[data-copy]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const old = b.textContent;
+      try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'Kopierat!'; }
+      catch (e) { b.textContent = 'Kunde inte kopiera'; }
+      setTimeout(() => b.textContent = old, 1500);
+    });
+  });
+</script>
+</body>
+</html>
