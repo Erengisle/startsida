@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Referatkontroll – egna ord, citat och avskrivet</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="core.js"></script>
+<style>
+:root{--bla:#2f3e56;--grans:#e3e6ea;--gra:#f4f5f7;--text:#1d2430;--mut:#5b6472}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);margin:0;background:#fafbfc;line-height:1.45}
+header{background:var(--bla);color:#fff;padding:18px 24px}
+header h1{margin:0;font-size:22px} header p{margin:4px 0 0;opacity:.85;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:20px 24px 60px}
+.kort{background:#fff;border:1px solid var(--grans);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.kort h2{font-size:17px;margin:0 0 10px} .steg{display:inline-block;background:var(--bla);color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:13px;margin-right:8px}
+label{font-size:13px;color:var(--mut);display:block;margin:8px 0 3px}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;font:inherit;font-size:14px;padding:7px 9px;border:1px solid #cfd4db;border-radius:7px;background:#fff}
+textarea{min-height:150px;resize:vertical}
+.rad{display:grid;grid-template-columns:repeat(4,1fr);gap:10px} @media(max-width:700px){.rad{grid-template-columns:1fr 1fr}}
+button{font:inherit;font-size:14px;border:1px solid #cfd4db;background:#fff;border-radius:7px;padding:7px 13px;cursor:pointer}
+button:hover{background:var(--gra)} button.hu{background:var(--bla);color:#fff;border-color:var(--bla)} button.hu:hover{background:#24314a}
+button:disabled{opacity:.5;cursor:default}
+.drop{border:2px dashed #b9c1cc;border-radius:10px;padding:22px;text-align:center;color:var(--mut);cursor:pointer;background:var(--gra)}
+.drop.over{border-color:var(--bla);background:#e9eef6}
+.lista{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.lista li{background:var(--gra);border:1px solid var(--grans);border-radius:16px;padding:3px 6px 3px 11px;font-size:13px}
+.lista li button{border:0;background:none;padding:0 5px;color:#a33;font-size:15px;line-height:1}
+.not{font-size:13px;color:var(--mut)} .fel-not{color:#a33;font-size:13px}
+.kallblock{border:1px solid var(--grans);border-radius:9px;padding:10px 12px;margin-bottom:10px;background:#fcfcfd}
+.knappar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+details summary{cursor:pointer;font-size:14px;color:var(--bla)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--bla);color:#fff;text-align:left;padding:6px 7px;font-weight:600;vertical-align:bottom}
+#sammanst td:first-child{white-space:nowrap;font-weight:600} #sammanst td:last-child{min-width:220px}
+td{border-bottom:1px solid var(--grans);padding:5px 7px;vertical-align:top}
+tr.rosa td{background:#fbe1e1} tr.gul td{background:#fff4c7}
+td.num{text-align:right;white-space:nowrap}
+.sym{display:inline-block;width:18px;text-align:center;font-weight:700}
+.sym.ok{color:#2f8f6b} .sym.nastan{color:#c58a00} .sym.saknas,.sym.fel{color:#d4502b}
+#status{font-size:14px;color:var(--mut);margin-left:6px}
+/* Elevblad */
+.blad{background:#fff;border:1px solid var(--grans);border-radius:12px;padding:20px 24px;margin:18px 0}
+.blad h1{font-size:20px;margin:0} .blad .who{font-size:13px;color:var(--mut);margin:2px 0 14px}
+.top{display:flex;gap:26px;align-items:center;flex-wrap:wrap;border:1px solid var(--grans);border-radius:12px;padding:12px 18px;margin-bottom:14px}
+.leg div{font-size:13px;margin:5px 0} .leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.leg b{display:inline-block;min-width:42px;text-align:right;margin-right:6px}
+.blad h2{font-size:15px;margin:14px 0 6px}
+.txt p{font-size:14px;line-height:1.8;margin:0 0 8px} .m{border-radius:2px;padding:1px 0}
+.ruta{border-left:4px solid;padding:8px 12px;margin:10px 0;font-size:13.5px;line-height:1.5;border-radius:0 8px 8px 0}
+.ruta.lila{background:#f7f1fc;border-color:#8a4fbf} .ruta.bla{background:#eef3fd;border-color:#3b6fd8} .ruta.gra{background:var(--gra);border-color:#9aa3b0}
+.ruta div{margin:3px 0}
+.fk{font-size:13px;table-layout:fixed} .fk td{padding:8px} .fk td.c{font-weight:700;width:30%} .fk td.c i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.bladknapp{float:right}
+.s{color:#666;font-size:12px}
+@media print{
+  @page{size:A4;margin:14mm 16mm}
+  body{background:#fff} header,.kort,.bladknapp,#sammanst-kort{display:none!important}
+  main{padding:0;max-width:none}
+  .blad{border:0;padding:0;margin:0;page-break-after:always;break-after:page}
+  body.en .blad:not(.valt){display:none}
+  body.sam .blad{display:none} body.sam #sammanst-kort{display:block!important;border:0;padding:0}
+  body.sam #sammanst-kort .knappar{display:none}
+  .top,.ruta,tr{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Referatkontroll</h1>
+  <p>Egna ord, citat och avskrivet, jämfört med källtexten. Allt räknas i din webbläsare – inga texter skickas eller sparas någonstans.</p>
+</header>
+<main>
+
+<section class="kort">
+  <h2><span class="steg">1</span>Uppgift</h2>
+  <label for="uppgift">Uppgiftens namn (syns på elevbladen)</label>
+  <input type="text" id="uppgift" placeholder="t.ex. Referatprov 1, SVA2 EKNA25:1">
+</section>
+
+<section class="kort">
+  <h2><span class="steg">2</span>Källtext</h2>
+  <p class="not">Klistra in artikelns brödtext (utan rubrik, byline och datum), eller läs in en .docx- eller .txt-fil. Har eleverna flera källor (t.ex. utredande text): lägg till en ruta per källa.</p>
+  <div id="kallor"></div>
+  <div class="knappar"><button id="laggTillKalla" type="button">+ Lägg till källa</button></div>
+  <details style="margin-top:12px" open>
+    <summary>Källhänvisning (titel räknas aldrig som avskrivet)</summary>
+    <div class="rad">
+      <div><label for="ki-titel">Artikelns titel</label><input type="text" id="ki-titel"></div>
+      <div><label for="ki-forf">Författare (för- och efternamn)</label><input type="text" id="ki-forf"></div>
+      <div><label for="ki-pub">Tidning/publikation</label><input type="text" id="ki-pub"></div>
+      <div><label for="ki-datum">Datum</label><input type="date" id="ki-datum"></div>
+    </div>
+    <p class="not">Fyll bara i det som står på elevernas exemplar. Tomma fält kontrolleras inte. Stavfel i elevernas källhänvisning godtas.</p>
+  </details>
+</section>
+
+<section class="kort">
+  <h2><span class="steg">3</span>Elevtexter</h2>
+  <div class="drop" id="drop" tabindex="0">
+    <b>Släpp filer här</b> eller klicka för att välja<br>
+    <span class="not">.docx, .txt eller en .zip (ladda ner mappen från Drive: högerklicka → Ladda ned)</span>
+    <input type="file" id="filer" multiple accept=".docx,.txt,.zip" hidden>
+  </div>
+  <p class="not">Elevens namn = filnamnet fram till första " - ". Källtextens fil sorteras inte bort automatiskt – ta bort den ur listan med ×.</p>
+  <ul class="lista" id="elevlista"></ul>
+  <details style="margin-top:10px">
+    <summary>Klistra in en elevtext</summary>
+    <label for="klNamn">Elevens namn</label><input type="text" id="klNamn">
+    <label for="klText">Text</label><textarea id="klText"></textarea>
+    <div class="knappar"><button type="button" id="klLagg">Lägg till</button></div>
+  </details>
+</section>
+
+<section class="kort">
+  <h2><span class="steg">4</span>Jämför</h2>
+  <div class="rad" style="grid-template-columns:220px 1fr">
+    <div><label for="langt">Långt citat (antal ord) ger en fråga</label><input type="number" id="langt" value="15" min="5" max="100"></div>
+  </div>
+  <div class="knappar"><button class="hu" id="kor" type="button">Jämför texterna</button><span id="status"></span></div>
+</section>
+
+<section class="kort" id="sammanst-kort" hidden>
+  <h2>Sammanställning</h2>
+  <p class="not">Sorterad efter andel nära källan. Rosa rad = 30 % eller mer nära källan, gul = 15–29 %.</p>
+  <div style="overflow-x:auto"><table id="sammanst"></table></div>
+  <div class="knappar">
+    <button type="button" id="kopiera">Kopiera tabellen (klistra in i Kalkylark)</button>
+    <button type="button" id="csv">Ladda ner CSV</button>
+    <button type="button" id="skrivSam">Skriv ut sammanställningen</button>
+    <button type="button" class="hu" id="skrivAlla">Skriv ut alla elevblad</button>
+    <span id="kopierat" class="not"></span>
+  </div>
+</section>
+
+<div id="blad"></div>
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const COL = {egen:["#2f8f6b",null,"Egna ord"], citat:["#3b6fd8","#dbe6fb","Citat med citattecken"],
+  felcitat:["#8a4fbf","#ecdff8","Citat som inte stämmer"], nara:["#e0a800","#fff0b3","Nästan avskrivet"], exakt:["#d4502b","#fbd3c4","Avskrivet ordagrant"]};
+const elever = []; // {namn, text, fil}
+let resultat = [];
+
+/* ---------- Källor ---------- */
+function nyKalla(text = "") {
+  const n = document.querySelectorAll(".kallblock").length + 1;
+  const d = document.createElement("div"); d.className = "kallblock";
+  d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:14px">Källa ${n}</b>
+    <span><label style="display:inline;margin:0 6px 0 0"><input type="file" accept=".docx,.txt" hidden><button type="button" class="las">Läs in fil</button></label>
+    ${n > 1 ? '<button type="button" class="tabort">Ta bort</button>' : ""}</span></div>
+    <textarea class="kalltext" placeholder="Klistra in källans brödtext här"></textarea>`;
+  d.querySelector(".kalltext").value = text;
+  const inp = d.querySelector("input[type=file]");
+  d.querySelector(".las").onclick = () => inp.click();
+  inp.onchange = async () => { if (inp.files[0]) d.querySelector(".kalltext").value = await lasFil(inp.files[0]); };
+  const tb = d.querySelector(".tabort"); if (tb) tb.onclick = () => d.remove();
+  $("#kallor").appendChild(d);
+}
+nyKalla();
+$("#laggTillKalla").onclick = () => nyKalla();
+
+/* ---------- Läsa filer ---------- */
+async function docxText(buf) {
+  const zip = await JSZip.loadAsync(buf);
+  const f = zip.file("word/document.xml"); if (!f) throw new Error("ingen text i filen");
+  const xml = new DOMParser().parseFromString(await f.async("string"), "application/xml");
+  const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  const paras = [];
+  for (const p of xml.getElementsByTagNameNS(W, "p")) {
+    let s = "";
+    const walk = n => { for (const c of n.childNodes) {
+      if (c.namespaceURI === W && c.localName === "t") s += c.textContent;
+      else if (c.namespaceURI === W && c.localName === "tab") s += " ";
+      else if (c.namespaceURI === W && (c.localName === "br" || c.localName === "cr")) s += " ";
+      else if (c.namespaceURI === W && c.localName === "p") continue;
+      else if (c.childNodes && c.childNodes.length) walk(c);
+    }};
+    walk(p);
+    if (s.trim()) paras.push(s.trim());
+  }
+  return paras.join("\n");
+}
+async function lasFil(file) {
+  const namn = file.name.toLowerCase();
+  if (namn.endsWith(".docx")) return docxText(await file.arrayBuffer());
+  return (await file.text()).replace(/\r\n?/g, "\n");
+}
+const elevnamn = filnamn => filnamn.replace(/^.*\//, "").replace(/\.(docx|txt)$/i, "").split(" - ")[0].trim();
+async function laggTillFiler(files) {
+  const fel = [];
+  for (const file of files) {
+    const n = file.name.toLowerCase();
+    try {
+      if (n.endsWith(".zip")) {
+        const zip = await JSZip.loadAsync(await file.arrayBuffer());
+        for (const [path, z] of Object.entries(zip.files)) {
+          if (z.dir || path.startsWith("__MACOSX") || /\/\./.test(path)) continue;
+          const p = path.toLowerCase();
+          try {
+            if (p.endsWith(".docx")) laggTillElev(elevnamn(path), await docxText(await z.async("arraybuffer")), path);
+            else if (p.endsWith(".txt")) laggTillElev(elevnamn(path), (await z.async("string")).replace(/\r\n?/g, "\n"), path);
+          } catch (e) { fel.push(path); }
+        }
+      } else if (n.endsWith(".docx") || n.endsWith(".txt")) laggTillElev(elevnamn(file.name), await lasFil(file), file.name);
+      else fel.push(file.name);
+    } catch (e) { fel.push(file.name); }
+  }
+  visaElever(fel);
+}
+function laggTillElev(namn, text, fil) {
+  if (!text.trim()) return;
+  let n = namn || "Elev", i = 2;
+  while (elever.some(e => e.namn === n)) n = `${namn} (${i++})`;
+  elever.push({namn: n, text, fil: fil || ""});
+}
+function visaElever(fel = []) {
+  const ul = $("#elevlista"); ul.innerHTML = "";
+  elever.sort((a, b) => a.namn.localeCompare(b.namn, "sv"));
+  elever.forEach((e, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `${esc(e.namn)} <span class="not">(${Referat.toks(e.text).length} ord)</span> <button type="button" title="Ta bort">×</button>`;
+    li.querySelector("button").onclick = () => { elever.splice(i, 1); visaElever(); };
+    ul.appendChild(li);
+  });
+  if (fel.length) { const li = document.createElement("li"); li.className = "fel-not"; li.style.background = "#fde8e8"; li.textContent = "Kunde inte läsas: " + fel.join(", "); ul.appendChild(li); }
+}
+const drop = $("#drop"), filer = $("#filer");
+drop.onclick = () => filer.click();
+drop.onkeydown = e => { if (e.key === "Enter" || e.key === " ") filer.click(); };
+filer.onchange = () => { laggTillFiler([...filer.files]); filer.value = ""; };
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => laggTillFiler([...e.dataTransfer.files]));
+$("#klLagg").onclick = () => {
+  const t = $("#klText").value; if (!t.trim()) return;
+  laggTillElev($("#klNamn").value.trim() || "Elev", t.replace(/\r\n?/g, "\n"), "");
+  $("#klNamn").value = ""; $("#klText").value = ""; visaElever();
+};
+
+/* ---------- Jämför ---------- */
+const vanta = () => new Promise(r => setTimeout(r, 0));
+$("#kor").onclick = async () => {
+  const kallor = [...document.querySelectorAll(".kalltext")].map(t => t.value.trim()).filter(Boolean);
+  if (!kallor.length) { $("#status").textContent = "Klistra in källtexten först."; return; }
+  if (!elever.length) { $("#status").textContent = "Lägg till elevtexter först."; return; }
+  const KI = {titel: $("#ki-titel").value.trim(), forfattare: $("#ki-forf").value.trim(), publikation: $("#ki-pub").value.trim(), datum: $("#ki-datum").value};
+  const opt = {langtCitat: +$("#langt").value || 15, titlar: KI.titel ? [KI.titel] : []};
+  $("#kor").disabled = true; resultat = [];
+  for (let i = 0; i < elever.length; i++) {
+    $("#status").textContent = `Jämför ${i + 1} av ${elever.length}: ${elever[i].namn} …`; await vanta();
+    const e = {...elever[i]};
+    // Elevens egen rubrik tas bort om den bara är artikelns titel
+    if (KI.titel) {
+      const rader = e.text.split("\n"), tt = Referat.toks(KI.titel).map(t => t[0]).join(" ");
+      if (rader.length > 1 && Referat.ratio(Referat.toks(rader[0]).map(t => t[0]).join(" "), tt) >= 0.9) e.text = rader.slice(1).join("\n");
+    }
+    const A = Referat.analysera(e.text, kallor, opt);
+    A.p = Referat.pct(A.cnt, A.tot);
+    A.nara = Math.round(100 * (A.cnt.exakt + A.cnt.nara) / A.tot);
+    A.kk = (KI.titel || KI.forfattare || KI.publikation || KI.datum) ? Referat.kallkontroll(e.text, KI) : [];
+    resultat.push({...e, A});
+  }
+  $("#status").textContent = `Klart: ${resultat.length} texter.`; $("#kor").disabled = false;
+  visaResultat();
+};
+
+/* ---------- Resultat ---------- */
+const symbol = {ok:"✓", nastan:"!", saknas:"✗", fel:"✗"};
+function kkKort(kk) {
+  if (!kk.length) return "–";
+  if (kk.every(k => k[1] === "ok")) return "Fullständig";
+  return kk.filter(k => k[1] !== "ok").map(k => `${k[0]} ${k[1] === "nastan" ? "nästan rätt" : k[1] === "fel" ? "fel" : "saknas"}`).join(", ");
+}
+const KOLUMNER = ["Elev", "Ord", "Egna ord %", "Citat %", "Felcitat %", "Nästan avskrivet %", "Ordagrant %", "Nära källan %", "Längsta följd (ord)", "Felcitat (antal)", "Långa citat", "Källhänvisning"];
+function tabellrader() {
+  return resultat.slice().sort((a, b) => b.A.nara - a.A.nara).map(r => [r.namn, r.A.ord, r.A.p.egen, r.A.p.citat, r.A.p.felcitat, r.A.p.nara, r.A.p.exakt, r.A.nara, r.A.langst, r.A.felcit.length, r.A.langa.length, kkKort(r.A.kk)]);
+}
+function visaResultat() {
+  const rader = tabellrader();
+  $("#sammanst").innerHTML = "<tr>" + KOLUMNER.map(k => `<th>${k}</th>`).join("") + "</tr>" +
+    rader.map(r => `<tr class="${r[7] >= 30 ? "rosa" : r[7] >= 15 ? "gul" : ""}">` + r.map((v, i) => `<td class="${i && i < 11 ? "num" : ""}">${esc(v)}</td>`).join("") + "</tr>").join("");
+  $("#sammanst-kort").hidden = false;
+  const uppg = $("#uppgift").value.trim() || "Referat";
+  $("#blad").innerHTML = resultat.map((r, i) => elevblad(r, uppg, i)).join("");
+  document.querySelectorAll(".bladknapp").forEach(b => b.onclick = () => skrivUt("en", +b.dataset.i));
+  $("#sammanst-kort").scrollIntoView({behavior: "smooth"});
+}
+function donut(c, tot, p) {
+  const r = 74; let a = 0, out = ""; const parts = Referat.ORDN.filter(k => c[k] > 0).map(k => [k, c[k]]);
+  for (const [k, v] of parts) {
+    const b = a + 2 * Math.PI * v / tot;
+    if (parts.length === 1) out += `<circle cx="100" cy="100" r="${r}" stroke="${COL[k][0]}" stroke-width="28" fill="none"/>`;
+    else {
+      const a0 = a + 0.025, a1 = b - 0.025;
+      if (a1 > a0) {
+        const x0 = 100 + r * Math.sin(a0), y0 = 100 - r * Math.cos(a0), x1 = 100 + r * Math.sin(a1), y1 = 100 - r * Math.cos(a1);
+        out += `<path d="M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1.toFixed(1)},${y1.toFixed(1)}" stroke="${COL[k][0]}" stroke-width="28" fill="none"/>`;
+      }
+    }
+    a = b;
+  }
+  return `<svg viewBox="0 0 200 200" width="170" height="170" role="img" aria-label="${p.egen} procent egna ord">${out}<text x="100" y="100" text-anchor="middle" font-size="34" font-weight="700" fill="#1d2430">${p.egen} %</text><text x="100" y="124" text-anchor="middle" font-size="13" fill="#555">egna ord</text></svg>`;
+}
+function marktext(txt, T, lab) {
+  let out = "", pos = 0, i = 0;
+  while (i < T.length) {
+    const k = lab[i];
+    if (k === "egen" || k === "titel") { i++; continue; }
+    let j = i; while (j + 1 < T.length && lab[j + 1] === k) j++;
+    const s = T[i][1], e = T[j][2];
+    const seg = esc(txt.slice(s, e)).replace(/\n/g, `</span>\n<span class="m" style="background:${COL[k][1]}">`);
+    out += esc(txt.slice(pos, s)) + `<span class="m" style="background:${COL[k][1]}">${seg}</span>`; pos = e; i = j + 1;
+  }
+  out += esc(txt.slice(pos));
+  return out.split("\n").filter(p => p.trim()).map(p => `<p>${p}</p>`).join("");
+}
+function elevblad(r, uppg, i) {
+  const A = r.A, p = A.p;
+  const leg = Referat.ORDN.map(k => `<div><i style="background:${COL[k][0]}"></i><b>${p[k]} %</b>${COL[k][2]}</div>`).join("");
+  let h = `<article class="blad" data-i="${i}"><button type="button" class="bladknapp" data-i="${i}">Skriv ut det här bladet</button>
+    <h1>${esc(r.namn)}</h1><div class="who">${esc(uppg)} · ${A.ord} ord</div>
+    <div class="top">${donut(A.cnt, A.tot, p)}<div class="leg">${leg}</div></div>`;
+  if (A.kk.length) {
+    h += `<h2>Källhänvisning</h2><div class="ruta gra">` + A.kk.map(k => `<div><span class="sym ${k[1]}">${symbol[k[1]]}</span> <b>${k[0]}</b>${k[2] ? " – " + esc(k[2]) : ""}</div>`).join("");
+    if (A.kk.some(k => k[1] !== "ok")) {
+      const KI = {titel: $("#ki-titel").value.trim(), forf: $("#ki-forf").value.trim(), pub: $("#ki-pub").value.trim(), datum: $("#ki-datum").value};
+      const delar = [KI.pub, KI.datum].filter(Boolean).join(", ");
+      h += `<div style="margin-top:6px">Så kan du skriva: <i>I artikeln ”${esc(KI.titel || "…")}”${delar ? ` (${esc(delar)})` : ""} skriver ${esc(KI.forf || "…")} att …</i></div>`;
+    }
+    h += `</div>`;
+  }
+  if (A.felcit.length) h += `<h2>Citat som inte stämmer</h2><div class="ruta lila">Ett citat måste vara ord för ord som i texten.` +
+    A.felcit.map(([du, ratt]) => `<div><b>Du skrev:</b> ”${esc(du)}”<br><b>I texten står det:</b> ”${esc(ratt)}”</div>`).join("") + `</div>`;
+  if (A.langa.length) h += `<div class="ruta bla">` + A.langa.map(([c, n]) => `<div>Ditt citat ”${esc(c.length > 90 ? c.slice(0, 90) + " …" : c)}” är ${n} ord. Behöver hela citatet vara med, eller kan du citera de viktigaste orden och skriva resten med egna ord?</div>`).join("") + `</div>`;
+  h += `<h2>Din text</h2><div class="txt">${marktext(r.text, A.T, A.lab)}</div>`;
+  h += `<h2>Vad betyder färgerna?</h2><table class="fk">
+    <tr><td class="c"><i style="background:${COL.egen[0]}"></i>Egna ord</td><td>Du säger samma sak som texten, men med dina egna ord. Det är så ett referat ska skrivas.</td></tr>
+    <tr><td class="c"><i style="background:${COL.citat[0]}"></i>Citat</td><td>Textens exakta ord, inom citattecken. Det är tillåtet, men använd det sparsamt.</td></tr>
+    <tr><td class="c"><i style="background:${COL.felcitat[0]}"></i>Citat som inte stämmer</td><td>Du har satt citattecken, men orden är inte exakt samma som i texten.</td></tr>
+    <tr><td class="c"><i style="background:${COL.nara[0]}"></i>Nästan avskrivet</td><td>Minst fyra ord i rad i samma ordning som i texten, utan citattecken. Orden kan vara likadana, felstavade eller böjda på ett annat sätt.</td></tr>
+    <tr><td class="c"><i style="background:${COL.exakt[0]}"></i>Avskrivet ordagrant</td><td>Minst fem ord i rad exakt som i texten, utan citattecken.</td></tr></table>
+    <div class="s" style="margin-top:4px">Ett gult ord mitt i en orange mening är oftast ett felstavat ord i en mening som annars är avskriven.</div></article>`;
+  return h;
+}
+
+/* ---------- Utskrift och export ---------- */
+function skrivUt(lage, i) {
+  document.body.classList.remove("en", "sam");
+  document.querySelectorAll(".blad").forEach(b => b.classList.toggle("valt", lage === "en" && +b.dataset.i === i));
+  if (lage) document.body.classList.add(lage);
+  window.print();
+}
+window.addEventListener("afterprint", () => document.body.classList.remove("en", "sam"));
+$("#skrivAlla").onclick = () => skrivUt("", -1);
+$("#skrivSam").onclick = () => skrivUt("sam", -1);
+$("#kopiera").onclick = async () => {
+  const tsv = [KOLUMNER, ...tabellrader()].map(r => r.map(v => String(v).replace(/[\t\n]/g, " ")).join("\t")).join("\n");
+  try { await navigator.clipboard.writeText(tsv); $("#kopierat").textContent = "Kopierat."; }
+  catch (e) { $("#kopierat").textContent = "Kunde inte kopiera – använd CSV i stället."; }
+};
+$("#csv").onclick = () => {
+  const csv = "﻿" + [KOLUMNER, ...tabellrader()].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
+  a.download = ($("#uppgift").value.trim() || "Referat").replace(/[\/:]/g, "-") + " - sammanställning.csv"; a.click();
+};
+</script>
+</body>
+</html>
